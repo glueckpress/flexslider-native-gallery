@@ -1,0 +1,361 @@
+/**
+ * jQuery FlexSlider v2.x
+ * http://www.woothemes.com/flexslider/
+ *
+ * Copyright 2012 WooThemes
+ * Free to use under the GPLv2 license.
+ * http://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * Contributing author: Tyler Smith (@mbmufffin)
+ * 
+ * Adaption for WordPress core gallery: Caspar Hübinger (@glueckpress)
+ */
+
+/* =Utilities
+----------------------------------------------- */
+/* Reset */
+.flex-container a:active,.flexslider a:active,.flex-container a:focus,.flexslider a:focus{outline:none;}
+.slides,.flex-control-nav,.flex-direction-nav,.entry-content .slides,.entry-content .flex-control-nav,.entry-content .flex-direction-nav{margin:0;padding: 0;list-style:none;}
+.slides, .entry-content .slides {margin: 0 !important; line-height: 1 !important; zoom: 1;}
+.flexslider ul,.flexslider li,.entry-content .flexslider ul,.entry-content .flexslider li{line-height:1;list-style:none;margin:0;padding:0;}
+
+/* FlexSlider Necessary Styles */ 
+.flexslider{
+	margin: 0;
+	padding: 0;
+}
+.flexslider .slides > li {
+	display: none; /* Hide the slides before the JS is loaded. Avoids image jumping */
+		-webkit-backface-visibility: hidden;
+		-moz-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+.flexslider .slides img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+.flex-pauseplay span{
+	text-transform: capitalize;
+}
+
+/* Clearfix for the .slides element */
+.slides:after {
+	content: "."; 
+	display: block; 
+	clear: both; 
+	visibility: hidden; 
+	line-height: 0; 
+	height: 0;
+} 
+html[xmlns] .slides {
+	display: block;
+} 
+* html .slides {
+	height: 1%;
+}
+
+/* No JavaScript Fallback */
+/* If you are not using another script, such as Modernizr, make sure you
+ * include a script that replaces the .no-js class with .js on page load */
+.no-js .slides > li:first-child {
+	display: block;
+}
+
+
+/* =FlexSlider Default Theme
+----------------------------------------------- */
+.flex-container {
+	clear: both;
+}
+.flexslider {
+	background: #fff;
+		-webkit-box-shadow: 0 1px 4px rgba(0,0,0,.2); 
+		-moz-box-shadow: 0 1px 4px rgba(0,0,0,.2); 
+		-ms-box-shadow: 0 1px 4px rgba(0,0,0,.2); 
+		-o-box-shadow: 0 1px 4px rgba(0,0,0,.2); 
+	box-shadow: 0 1px 4px rgba(0,0,0,.2); 
+	margin-left: 0;
+	margin-right: 0; 
+	position: relative;
+		-webkit-transition: height .25s linear ;
+		-moz-transition: height .25s linear; 
+		-ms-transition: height .25s linear; 
+		-o-transition: height .25s linear; 
+	transition: all .25s linear;
+	zoom: 1;
+}
+.fsloading {
+	background: #fff url('../images/loading.gif') no-repeat center;
+	height: 300px;
+}
+.fsloading * {
+	opacity: 0;
+}
+.fsready * {
+	opacity: 1;
+}
+.flex-viewport,
+.flex-viewport .slides,
+.flex-viewport .slides li {
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-ms-box-sizing: border-box;
+		-o-box-sizing: border-box;
+	box-sizing: border-box;
+}
+.flex-viewport {
+	max-height: 100%;
+	max-width: 100%;
+		-webkit-transition: all 1s ease; 
+		-moz-transition: all 1s ease; 
+		-ms-transition: all 1s ease; 
+		-o-transition: all 1s ease; 
+	transition: all 1s ease;
+}
+.loading .flex-viewport {
+	min-height: 300px;
+}
+.flex-viewport .slides li,
+.flex-viewport .slides li figure {
+	position: relative;
+	height: 100%;
+	max-height: 100%;
+	overflow: hidden;
+}
+.flexslider img,
+.entry-content .flexslider img { /* Default image styles (fallback) */
+		-webkit-box-shadow: none !important;
+		-moz-box-shadow: none !important;
+		-o-box-shadow: none !important;
+		-ms-box-shadow: none !important;
+	box-shadow: none !important;
+	height: auto;
+	line-height: 1 !important;
+	margin: 0 auto;
+	width: auto;
+}
+
+/* Dynamic image formats */
+.flexslider img.ls,
+.entry-content .flexslider img.ls { /* lanscape images */
+	max-height: none;
+	max-width: 100%;
+}
+.flexslider img.pt,
+.entry-content .flexslider img.pt { /* portrait images */
+	max-height: 100%;
+	max-width: none;
+}
+.flexslider img.pt,
+.entry-content .flexslider img.sq { /* square images */
+	max-height: 100%;
+	max-width: none;
+}
+.flex-caption {
+	background: #333;
+	background: rgba(0,0,0,.7);
+	bottom: -100%;
+	color: #fbfbfb;
+	color: rgba(255,255,255,.8);
+	left: 0;
+	line-height: 1;
+	padding: 2%;
+	position: absolute;
+	text-shadow: none;
+		-webkit-transition: all .25s ease ;
+		-moz-transition: all .25s ease; 
+		-ms-transition: all .25s ease; 
+		-o-transition: all .25s ease; 
+	transition: all .25s ease;
+	width: 96%;
+	z-index: 101;
+}
+.flex-container:hover .flex-caption {
+	bottom: 0;
+}
+
+/* =Ken Burns effect
+----------------------------------------------- */
+/* 
+	future-proof transform syntax,
+	http://radiatingstar.com/transition-with-transform-cant-be-future-proof 
+*/
+.flex-viewport .slides .focus-shift,
+.flex-viewport .slides img.kb {
+		-webkit-transition-property: -webkit-transform;
+			-webkit-transition-property: transform;
+		-moz-transition-property: -moz-transform;
+			-moz-transition-property: transform;
+		-ms-transition-property: -ms-transform;
+			-ms-transition-property: transform;
+		-o-transition-property: -o-transform;
+			-o-transition-property: transform;
+	transition-property: transform;
+		-webkit-transition-timing-function: linear;
+		-moz-transition-timing-function: linear;
+		-ms-transition-timing-function: linear;
+		-o-transition-timing-function: linear;
+	transition-timing-function: linear;
+}
+/* 
+	Fix jittery Ken Burns effect by Menno van Slooten,
+	http://www.mennovanslooten.nl/blog/post/78 
+*/
+.flex-viewport .slides img.kb {
+		-webkit-transform: rotate(0.1deg);
+		-moz-transform: rotate(0.1deg);
+		-ms-transform: rotate(0.1deg);
+		-o-transform: rotate(0.1deg);
+	transform: rotate(0.1deg);
+	/* Can be overriden by shortcode parameter */
+		-webkit-transform-origin: 20% 80%;
+		-moz-transform-origin: 20% 80%;
+		-o-transform-origin: 20% 80%;
+	transform-origin: 20% 80%;
+}
+.flex-viewport li img.bl {
+		-webkit-transform-origin: bottom left;
+		-moz-transform-origin: bottom left;
+		-o-transform-origin: bottom left;
+	transform-origin: bottom left;
+}
+.flex-viewport li img.tr {
+		-webkit-transform-origin: top right;
+		-moz-transform-origin: top right;
+		-o-transform-origin: top right;
+	transform-origin: top right;
+}
+.flex-viewport li img.tl {
+		-webkit-transform-origin: top left;
+		-moz-transform-origin: top left;
+		-o-transform-origin: top left;
+	transform-origin: top left;
+}
+.flex-viewport li img.br {
+		-webkit-transform-origin: bottom right;
+		-moz-transform-origin: bottom right;
+		-o-transform-origin: bottom right;
+	transform-origin: bottom right;
+}
+
+
+/* =Direction Nav
+----------------------------------------------- */
+.flex-direction-nav {
+	*height: 0;
+	list-style: none !important; 
+	margin: 0 !important; 
+	line-height: 1;}
+.flex-direction-nav a {
+	width: 30px; 
+	height: 100%; 
+	margin: 0; 
+	display: block; 
+	background: url('../images/flexslider-nav.png') no-repeat 0 center; 
+	background-color: #fff; 
+	filter:alpha(opacity=30); 
+	background-color: rgba(255,255,255,.3); 
+	position: absolute; 
+	top: 0; 
+	cursor: pointer; 
+	text-indent: -9999px; 
+	opacity: 0; 
+		-webkit-transition: all .3s ease; 
+		-moz-transition: all .3s ease; 
+		-ms-transition: all .3s ease; 
+		-o-transition: all .3s ease; 
+	transition: all .3s ease; 
+	z-index: 100; 
+}
+.flex-direction-nav .flex-next {
+	background-position: 100% center; 
+	right: 5px; 
+}
+.flex-direction-nav .flex-prev {
+	left: 5px;
+}
+.flexslider:hover .flex-next,
+.flexslider:hover .flex-prev {
+	opacity: 0.8;
+}
+.flexslider:hover .flex-next:hover, 
+.flexslider:hover .flex-prev:hover {
+	background-color: #fff;
+	background-color: rgba(255,255,255,.5);
+	opacity: 1;
+}
+.flex-direction-nav .flex-disabled {
+	opacity: 0 !important; 
+	filter:alpha(opacity=0); 
+	cursor: default;
+}
+
+/* =Control Nav
+----------------------------------------------- */
+.flex-control-nav {
+	width: 100%; 
+	position: absolute; 
+	bottom: -40px; 
+	text-align: center;}
+.flex-control-nav li {
+	margin: 0 6px; 
+	display: inline-block; 
+	zoom: 1; 
+	*display: inline;
+}
+.flex-control-paging li a {
+	width: 11px; 
+	height: 11px; 
+	display: block; 
+	background: #666; 
+	background: rgba(0,0,0,0.5); 
+	cursor: pointer; 
+	text-indent: -9999px; 
+	border-radius: 20px;
+	box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
+}
+.flex-control-paging li a:hover { 
+	background: #333; 
+	background: rgba(0,0,0,0.7); 
+}
+.flex-control-paging li a.flex-active { 
+	background: #000; 
+	background: rgba(0,0,0,0.9); 
+	cursor: default; 
+}
+.flex-control-thumbs {
+	margin: 5px 0 0; 
+	position: static; 
+	overflow: hidden;
+}
+.flex-control-thumbs li {
+	width: 25%; 
+	float: left; 
+	margin: 0 !important; 
+	list-style: none !important;
+}
+.flex-control-thumbs img {
+	width: 100%; 
+	display: block; 
+	opacity: .7; 
+	cursor: pointer;
+}
+.flex-control-thumbs img:hover {
+	opacity: 1;
+}
+.flex-control-thumbs .flex-active {
+	opacity: 1; 
+	cursor: default;
+}
+
+@media screen and (max-width: 860px) {
+	.flex-direction-nav .flex-prev {
+	  	opacity: 1; 
+		left: 0;
+	}
+	.flex-direction-nav .flex-next {
+		opacity: 1; 
+		right: 0;
+	}
+}
