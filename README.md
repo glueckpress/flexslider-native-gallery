@@ -28,7 +28,7 @@ Use the “Text” tab in your editor (know as “HTML” prior to WordPress 3.5
 
 ### What slider script is being used in the plugin?
 
-The FlexSlider jQuery plugin originally coded by Tyler Smith (@madebymuffin), now curated by WooThemes (http://www.woothemes.com/flexslider/).
+The FlexSlider jQuery plugin originally coded by Tyler Smith (@madebymuffin), now curated by [WooThemes](http://www.woothemes.com/flexslider/).
 
 ## Contributors
 
