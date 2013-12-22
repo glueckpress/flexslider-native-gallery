@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: FlexSlider Native Gallery
-Plugin URI: 
+Plugin URI:
 Description: Provides a new shortcode to use to alter the WordPress gallery core feature. Just insert a gallery into the text editor and replace [gallery (parameters)] with [flexslider (parameters)].
 Author: Caspar Hübinger
 Version: 0.2
@@ -11,7 +11,7 @@ Author URI: http://glueckpress.com/
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -45,7 +45,7 @@ function gpfs_print_jquery_in_footer( &$scripts) {
  *
  * Pass your own javascript via add_filter( 'flexslider_init', 'your_custom_register_script_function' ).
  * Pass your own stylesheet via add_filter( 'flexslider_style', 'your_custom_register_style_function' ).
- * 
+ *
  */
 add_action( 'init', 'my_scritps' );
 function my_scritps(){
@@ -59,14 +59,15 @@ function my_scritps(){
  * Custom gallery markup and shortcode
  *
  */
-add_shortcode( 'flexslider', 'gpfs_gallery_shortcode' );
+remove_shortcode( 'gallery', 'gallery_shortcode' );
+add_shortcode( 'gallery', 'gpfs_gallery_shortcode' );
 function gpfs_gallery_shortcode( $attr ) {
 	global $post, $wp_scripts;
 
 	static $instance = 0;
 	$instance++;
 
-	// Allow plugins/themes to override the default gallery template? 
+	// Allow plugins/themes to override the default gallery template?
 	// Nope, not here!
 	/*
 	$output = apply_filters( 'post_gallery', '', $attr );
@@ -82,7 +83,8 @@ function gpfs_gallery_shortcode( $attr ) {
 	}
 
 	extract(shortcode_atts(array(
-		 'order'				=> 'ASC'
+		 'flexslider'			=> false
+		,'order'				=> 'ASC'
 		,'orderby'				=> 'menu_order ID'
 		,'id'					=> $post->ID
  		,'size'					=> apply_filters( 'gallery_default_size', 'large' )
@@ -96,15 +98,21 @@ function gpfs_gallery_shortcode( $attr ) {
 		,'transform_duration'	=> '30s'
 		,'transform_origin'		=> '' // bl,tr,tl,br
 	), $attr ) );
-	
+
+/* TO DO:
+	implement add_filter( 'post_gallery', 'gpfs_flexslider' );
+	if( true !== $flexslider)
+		return;
+*/
+
 	$transform_origin_list = explode(',', $transform_origin);
-	
+
 	$localized_data = array( ( $instance - 1 ) => array( 'kenburns' => $kenburns, 'scale' => $scale ) );
 
 	$id = intval( $id );
 	if ( 'RAND' == $order )
 		$orderby = 'none';
-	
+
 	$ids = ( ! empty( $include ) ) ? $include : $ids;
 
 	if ( ! empty( $ids ) ) {
@@ -133,10 +141,10 @@ function gpfs_gallery_shortcode( $attr ) {
 	}
 
 	$selector = "gallery-{$instance}";
-	
+
 	$output  = '<section id="' . $selector . '" class="flex-container">' . "\n";
 	$output .= '<div class="flexslider fsloading">' . "\n";
-	
+
 	$sliderlist  = '<ul class="slides" ';
 	$sliderlist .= ' data-animation="';
 					$sliderlist .= ( $kenburns ) ? 'kb' : 'none';
@@ -166,14 +174,14 @@ function gpfs_gallery_shortcode( $attr ) {
 		$sliderlist .= '</figure>';
 		$sliderlist .= '</li>' . "\n";
 	}
-	
+
 	$output .= $sliderlist . '</div><!-- .slider -->' . "\n";
-	
+
 	if( false !== $carousel )
 	 	$output .= '<div id="carousel-' . $selector . '" class="flexslider carousel carousel-' . $selector . '">' . $sliderlist . '</div><!-- .nav-carousel -->' . "\n";
 
 	$output .= '</section><!-- #' . $selector . '.flex-container -->' . "\n";
-	
+
 	/* By now, we pretty much have a gallery, so let's enqueue scripts */
 	if( false == wp_script_is( 'jquery' ) )
 		wp_enqueue_script( 'jquery' );
@@ -181,7 +189,7 @@ function gpfs_gallery_shortcode( $attr ) {
 	wp_enqueue_script( 'flexslider-core' );
 	wp_enqueue_script( 'flexslider-init' );
 	wp_enqueue_style( 'flexslider-style' );
-	
+
 	/* And action */
 	return $output;
 }
